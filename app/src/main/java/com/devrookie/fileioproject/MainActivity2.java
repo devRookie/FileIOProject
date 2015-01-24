@@ -9,8 +9,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
-import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,8 +17,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -38,11 +34,9 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
     private Button addBtn;
     private ListView mainListView;
     Context ctx;
-
     ArrayAdapter<String> fileAdapter;
     private List<String> fileListArray = new ArrayList<>();
     SharedPreferences prefs;
-    boolean isChecked = false;
 
 
 
@@ -212,21 +206,12 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         //3. Apply method with the passed string of title / description
 
         final SharedPreferences prefsnf = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean isChecked = prefsnf.getBoolean("cbxSetting", false);
-
 
         LayoutInflater inflateDialog = getLayoutInflater();
         final View dialogAddView = inflateDialog.inflate(R.layout.dialog_layout, null);
 
         final EditText dialogTitle = (EditText)dialogAddView.findViewById(R.id.etDialogTitle); //Title
         final EditText diaglogPassword = (EditText)dialogAddView.findViewById(R.id.etPassword);
-
-        if (isChecked){
-//            diaglogPassword.setTransformationMethod(new PasswordTransformationMethod());
-            Log.d("isChecked", "True");
-        }else
-//        diaglogPassword.setTransformationMethod(null);
-            Log.d("isChecked", "False");
 
         AlertDialog.Builder setUpAlert = new AlertDialog.Builder(this);
         setUpAlert.setView(dialogAddView);
@@ -350,19 +335,6 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId())
         {
-            case R.id.action_settings:
-                View v = View.inflate(this, R.layout.cbx_layoout, null);
-                AlertDialog.Builder ab = new AlertDialog.Builder(this);
-                ab.setView(v);
-                ab.setTitle("Setting");
-                ab.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                ab.show();
-                break;
             case R.id.action_help:
                 //TODO Open small dialog to read a help me
                 AlertDialog.Builder help = new AlertDialog.Builder(this);
