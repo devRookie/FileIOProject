@@ -16,6 +16,9 @@
     <string name="etPasswordHint">Password (Optional)</string>
     <string name="etEnterPassword">Enter your password</string>
     <string name="menuAbout">About</string>
+    <string name="tvAbout">Simple file keeping application. Enjoy!</string>
+    <string name="cbxShowPass">Show Password</string>
+    <string name="btnReturnStr">Ok</string>
 
 
 </resources>

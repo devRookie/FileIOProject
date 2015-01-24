@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +19,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -39,6 +42,8 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
     ArrayAdapter<String> fileAdapter;
     private List<String> fileListArray = new ArrayList<>();
     SharedPreferences prefs;
+    boolean isChecked = false;
+
 
 
     @Override
@@ -94,7 +99,6 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                 final String password = prefs.getString(fileName, "");
 
                 if (password.equals("")){
-                    Toast.makeText(MainActivity2.this, "Check password if*", Toast.LENGTH_SHORT).show();
 
                     Intent myIntent = new Intent(getApplicationContext(), FileContent.class);
                     myIntent.putExtra("fileName", fileName); //placing filename into a key to grab again for use in file content
@@ -208,19 +212,30 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         //3. Apply method with the passed string of title / description
 
         final SharedPreferences prefsnf = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isChecked = prefsnf.getBoolean("cbxSetting", false);
+
 
         LayoutInflater inflateDialog = getLayoutInflater();
         final View dialogAddView = inflateDialog.inflate(R.layout.dialog_layout, null);
-        AlertDialog.Builder setUpAlert = new AlertDialog.Builder(this);
-        setUpAlert.setView(dialogAddView);
-        setUpAlert.setTitle("Adding new file.");
 
         final EditText dialogTitle = (EditText)dialogAddView.findViewById(R.id.etDialogTitle); //Title
         final EditText diaglogPassword = (EditText)dialogAddView.findViewById(R.id.etPassword);
 
+        if (isChecked){
+//            diaglogPassword.setTransformationMethod(new PasswordTransformationMethod());
+            Log.d("isChecked", "True");
+        }else
+//        diaglogPassword.setTransformationMethod(null);
+            Log.d("isChecked", "False");
+
+        AlertDialog.Builder setUpAlert = new AlertDialog.Builder(this);
+        setUpAlert.setView(dialogAddView);
+        setUpAlert.setTitle("Adding new file.");
+
         setUpAlert.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
 
                 String myTitle = dialogTitle.getText().toString();
                 String myPass = diaglogPassword.getText().toString();
@@ -229,6 +244,13 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                     Toast.makeText(getApplicationContext(), "Empty title, please try again.", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+                //Check through listarray
+                if (fileListArray.contains(myTitle)){
+                    Toast.makeText(MainActivity2.this, "File already exists.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 fileListArray.add(myTitle);
                 fileAdapter.notifyDataSetChanged();
 
@@ -265,7 +287,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         try {
 
             OutputStreamWriter out = new OutputStreamWriter(openFileOutput(title,MODE_PRIVATE));
-            out.write("Add your description...");
+            out.write("Add text..");
             out.close();
             Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
         }
@@ -329,7 +351,17 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         switch(item.getItemId())
         {
             case R.id.action_settings:
-
+                View v = View.inflate(this, R.layout.cbx_layoout, null);
+                AlertDialog.Builder ab = new AlertDialog.Builder(this);
+                ab.setView(v);
+                ab.setTitle("Setting");
+                ab.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                ab.show();
                 break;
             case R.id.action_help:
                 //TODO Open small dialog to read a help me
@@ -337,7 +369,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                 help.setIcon(R.drawable.ic_launcher);
                 help.setTitle("Instructions");
                 help.setMessage("  1. Click \"Add\" to add a new file.\n" +
-                        "  2. Input a title for your new file (password is optional) and press Ok.\n" +
+                        "  2. Input a title for your new file (password is optional).\n" +
                         "  3. Your file is now created, click your file to begin");
                 help.setPositiveButton("Ok, I got it thanks.", new DialogInterface.OnClickListener() {
                     @Override
@@ -347,10 +379,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                 }).show();
                 break;
             case R.id.action_about:
-                Dialog about = new Dialog(this);
-                about.setContentView(R.layout.activity_about);
-                about.setCancelable(true);
-                about.show();
+                startActivity(new Intent(MainActivity2.this, About.class));
                 break;
         }
         return true;
@@ -366,12 +395,18 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
 
                 try {
                     String dir = getFilesDir().getAbsolutePath();
-                    Log.d("String Dir", dir);
+
                     File myFile = new File(dir, fn);
                     boolean checkIfDeleted = myFile.delete();
+
                     if (!checkIfDeleted)
                         Toast.makeText(getApplicationContext(), "Cannot delete. There is no text to delete.", Toast.LENGTH_LONG).show();
                     else {
+
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.remove(fn);
+                        editor.apply();
+
                         fileListArray.remove(position);
                         fileAdapter.notifyDataSetChanged();
                         Toast.makeText(getApplicationContext(), "File deleted", Toast.LENGTH_SHORT).show();

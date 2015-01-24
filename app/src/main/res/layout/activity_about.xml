@@ -2,21 +2,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:src="@drawable/splash_logo"
+        android:layout_gravity="center"
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="This application is brought to you by"
         android:id="@+id/textView2"
-        android:layout_marginTop="39dp"
+        android:layout_marginTop="56dp"
+        android:layout_gravity="center_horizontal|top"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <ImageView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:layout_centerVertical="true"
+        android:text="@string/tvAbout"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/imageView"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/splash_logo" />
+        android:textColor="#000000"
+        android:textSize="20dp"/>
 </RelativeLayout>
