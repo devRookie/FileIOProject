@@ -11,6 +11,9 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -35,6 +38,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
 
     ArrayAdapter<String> fileAdapter;
     private List<String> fileListArray = new ArrayList<>();
+    SharedPreferences prefs;
 
 
     @Override
@@ -74,6 +78,8 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
 
     private void editFile(final int position) {
 
+        final String fileName = (String) mainListView.getItemAtPosition(position);
+
         AlertDialog.Builder editAlert = new AlertDialog.Builder(this);
         editAlert.setIcon(R.drawable.ic_launcher);
         editAlert.setCancelable(true);
@@ -82,52 +88,91 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //TODO Start new intent to file content
-                String fileName = (String) mainListView.getItemAtPosition(position);
+                final String fileName = (String) mainListView.getItemAtPosition(position);
 
-                Intent myIntent = new Intent(getApplicationContext(), FileContent.class);
-                myIntent.putExtra("fileName", fileName); //placing filename into a key to grab again for use in file content
-                startActivity(myIntent);
+                prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity2.this);
+                final String password = prefs.getString(fileName, "");
 
+                if (password.equals("")){
+                    Toast.makeText(MainActivity2.this, "Check password if*", Toast.LENGTH_SHORT).show();
+
+                    Intent myIntent = new Intent(getApplicationContext(), FileContent.class);
+                    myIntent.putExtra("fileName", fileName); //placing filename into a key to grab again for use in file content
+                    startActivity(myIntent);
+                }else{
+                    LayoutInflater inf = getLayoutInflater();
+                    AlertDialog.Builder d = new AlertDialog.Builder(MainActivity2.this);
+                    View v = inf.inflate(R.layout.password_layout_d, null);
+                    d.setView(v);
+                    d.setTitle("Please enter password");
+
+                    final EditText etEntPass = (EditText)v.findViewById(R.id.etEnterPassword);
+
+                    d.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            final String usrPassword = etEntPass.getText().toString();
+                            if (usrPassword.equals(password)){
+                                Intent myIntent = new Intent(getApplicationContext(), FileContent.class);
+                                myIntent.putExtra("fileName", fileName); //placing filename into a key to grab again for use in file content
+                                startActivity(myIntent);
+                                return;
+                            }else
+                            Toast.makeText(MainActivity2.this, "Wrong password please try again", Toast.LENGTH_SHORT).show();
+                            etEntPass.getText().clear();
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    }).show();
+
+                }//else
 
             }
-        }).setNeutralButton("Delete", new DialogInterface.OnClickListener() { //Negative pops up another dialog
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        })
 
-                AlertDialog.Builder alertDelete = new AlertDialog.Builder(ctx);
-                alertDelete.setMessage("Are you sure you want to delete this file?");
-                alertDelete.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setNeutralButton("Delete", new DialogInterface.OnClickListener() { //Negative pops up another dialog
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String fn = (String) mainListView.getItemAtPosition(position);
 
-                        try {
+                        prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity2.this);
+                        final String pwStr = prefs.getString(fileName, "");
 
-                            String dir = getFilesDir().getAbsolutePath();
-                            Log.d("String Dir", dir);
-                            File myFile = new File(dir, fn);
-                            boolean checkIfDeleted = myFile.delete();
-                            if (!checkIfDeleted)
-                                Toast.makeText(getApplicationContext(), "Cannot delete. There is no text to delete.", Toast.LENGTH_LONG).show();
-                            else {
-                                fileListArray.remove(position);
-                                fileAdapter.notifyDataSetChanged();
-                                Toast.makeText(getApplicationContext(), "File deleted", Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (Throwable t) {
-                            Toast.makeText(getApplicationContext(), "Exception: " + t.toString(), Toast.LENGTH_LONG).show();
+                        if (pwStr.equals("")) { //Means there is a password
+                            deleteDialog(position);
+                        } else {
+                            LayoutInflater inf = getLayoutInflater();
+                            AlertDialog.Builder d = new AlertDialog.Builder(MainActivity2.this);
+                            View v = inf.inflate(R.layout.password_layout_d, null);
+                            d.setView(v);
+                            d.setTitle("Please enter password");
+
+                            final EditText etEntPass = (EditText)v.findViewById(R.id.etEnterPassword);
+
+                            d.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    final String usrPassword = etEntPass.getText().toString();
+                                    if (usrPassword.equals(pwStr)){
+                                        deleteDialog(position);
+                                        return;
+                                    }else
+                                        Toast.makeText(MainActivity2.this, "Wrong password please try again", Toast.LENGTH_SHORT).show();
+                                        etEntPass.getText().clear();
+                                }
+                            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            }).show();
                         }
-                    }
-                });
-
-                alertDelete.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
+                    }//OnClickDelete
                 }).show();
-            }//OnClickDelete
-        }).show();
     }//editFile
 
 
@@ -162,6 +207,8 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         //2. Get text and save to string to be passes
         //3. Apply method with the passed string of title / description
 
+        final SharedPreferences prefsnf = PreferenceManager.getDefaultSharedPreferences(this);
+
         LayoutInflater inflateDialog = getLayoutInflater();
         final View dialogAddView = inflateDialog.inflate(R.layout.dialog_layout, null);
         AlertDialog.Builder setUpAlert = new AlertDialog.Builder(this);
@@ -169,12 +216,14 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         setUpAlert.setTitle("Adding new file.");
 
         final EditText dialogTitle = (EditText)dialogAddView.findViewById(R.id.etDialogTitle); //Title
+        final EditText diaglogPassword = (EditText)dialogAddView.findViewById(R.id.etPassword);
 
         setUpAlert.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
                 String myTitle = dialogTitle.getText().toString();
+                String myPass = diaglogPassword.getText().toString();
 
                 if (myTitle.equals("")) {
                     Toast.makeText(getApplicationContext(), "Empty title, please try again.", Toast.LENGTH_SHORT).show();
@@ -183,7 +232,23 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                 fileListArray.add(myTitle);
                 fileAdapter.notifyDataSetChanged();
 
+                if (myPass.equals("")){
+                    AlertDialog.Builder d = new AlertDialog.Builder(MainActivity2.this);
+                    d.setTitle("Heads up!");
+                    d.setMessage("You did not assgin a password");
+                    d.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+                }
+
+                SharedPreferences.Editor editor = prefsnf.edit();
+                editor.putString(myTitle, myPass);
+                editor.apply();
                 addFileToData(myTitle);
+
 
 
             }
@@ -252,33 +317,77 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
 
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId())
+        {
+            case R.id.action_settings:
 
+                break;
+            case R.id.action_help:
+                //TODO Open small dialog to read a help me
+                AlertDialog.Builder help = new AlertDialog.Builder(this);
+                help.setIcon(R.drawable.ic_launcher);
+                help.setTitle("Instructions");
+                help.setMessage("  1. Click \"Add\" to add a new file.\n" +
+                        "  2. Input a title for your new file (password is optional) and press Ok.\n" +
+                        "  3. Your file is now created, click your file to begin");
+                help.setPositiveButton("Ok, I got it thanks.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+                break;
+            case R.id.action_about:
+                Dialog about = new Dialog(this);
+                about.setContentView(R.layout.activity_about);
+                about.setCancelable(true);
+                about.show();
+                break;
+        }
+        return true;
+    }
 
+    public void deleteDialog(final int position){
+        AlertDialog.Builder alertDelete = new AlertDialog.Builder(ctx);
+        alertDelete.setMessage("Are you sure you want to delete this file?");
+        alertDelete.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String fn = (String) mainListView.getItemAtPosition(position);
 
+                try {
+                    String dir = getFilesDir().getAbsolutePath();
+                    Log.d("String Dir", dir);
+                    File myFile = new File(dir, fn);
+                    boolean checkIfDeleted = myFile.delete();
+                    if (!checkIfDeleted)
+                        Toast.makeText(getApplicationContext(), "Cannot delete. There is no text to delete.", Toast.LENGTH_LONG).show();
+                    else {
+                        fileListArray.remove(position);
+                        fileAdapter.notifyDataSetChanged();
+                        Toast.makeText(getApplicationContext(), "File deleted", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Exception: " + t.toString(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        alertDelete.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        }).show();
+    }
 
 }//TODO: END OF MAIN CLASS

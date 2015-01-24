@@ -9,8 +9,13 @@
     <string name="btnClearStr">Clear</string>
     <string name="btnRefreshStr">Refresh</string>
     <string name="etHintSearch">Search Here</string>
-    <string name="etHintTitle">Title</string>
+    <string name="etHintTitle">Title*</string>
     <string name="etHintDescription">Description</string>
     <string name="tvTitleString">Title</string>
+    <string name="menuHelp">Help</string>
+    <string name="etPasswordHint">Password (Optional)</string>
+    <string name="etEnterPassword">Enter your password</string>
+    <string name="menuAbout">About</string>
+
 
 </resources>
