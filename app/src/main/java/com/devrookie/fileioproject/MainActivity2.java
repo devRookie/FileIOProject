@@ -25,20 +25,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by Omie Kue on 1/20/2015.
- */
+
 public class MainActivity2 extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
 
-    private Button addBtn, clearBtn;
+    private Button addBtn;
     private ListView mainListView;
     Context ctx;
 
     ArrayAdapter<String> fileAdapter;
-    private List<String> fileListArray = new ArrayList<String>();
-
-    boolean startFiles = false;
+    private List<String> fileListArray = new ArrayList<>();
 
 
     @Override
@@ -49,7 +45,6 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
         ctx = this;
     //Button
         this.addBtn = (Button)findViewById(R.id.btnAdd);
-        this.clearBtn = (Button)findViewById(R.id.btnClear);
     //ListView
         this.mainListView = (ListView)findViewById(R.id.mainListView);
 
@@ -69,15 +64,11 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                 setUpNewFile();
             }
         });
-
-
-
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position,
                             long id) {
-        //viewFileInformation(position);
         editFile(position);
     }
 
@@ -92,7 +83,6 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
             public void onClick(DialogInterface dialog, int which) {
                 //TODO Start new intent to file content
                 String fileName = (String) mainListView.getItemAtPosition(position);
-                Toast.makeText(getApplicationContext(), fileName, Toast.LENGTH_SHORT).show();
 
                 Intent myIntent = new Intent(getApplicationContext(), FileContent.class);
                 myIntent.putExtra("fileName", fileName); //placing filename into a key to grab again for use in file content
@@ -118,7 +108,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                             File myFile = new File(dir, fn);
                             boolean checkIfDeleted = myFile.delete();
                             if (!checkIfDeleted)
-                                Toast.makeText(getApplicationContext(), "Cannot delete. Error.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "Cannot delete. There is no text to delete.", Toast.LENGTH_LONG).show();
                             else {
                                 fileListArray.remove(position);
                                 fileAdapter.notifyDataSetChanged();
@@ -147,17 +137,17 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
             OutputStreamWriter outNote = new OutputStreamWriter(openFileOutput("Notes",MODE_PRIVATE));
             outNote.write("Class registration starts next week on July 25th. ");
             outNote.close();
-            //Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
+
 
             OutputStreamWriter outToDo = new OutputStreamWriter(openFileOutput("ToDo",MODE_PRIVATE));
             outToDo.write("Finish science project \nWash the car \nPay the water bills ");
             outToDo.close();
-            //Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
+
 
             OutputStreamWriter outList = new OutputStreamWriter(openFileOutput("Shopping List",MODE_PRIVATE));
             outList.write("Eggs, Bread, Ham, Cheese, Milk ");
             outList.close();
-            //Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
+
         }
         catch(Throwable t) {
             Toast.makeText(this, "Exception: "+ t.toString(), Toast.LENGTH_LONG).show();
@@ -186,7 +176,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
 
                 String myTitle = dialogTitle.getText().toString();
 
-                if (dialogTitle.equals("")) {
+                if (myTitle.equals("")) {
                     Toast.makeText(getApplicationContext(), "Empty title, please try again.", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -194,7 +184,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
                 fileAdapter.notifyDataSetChanged();
 
                 addFileToData(myTitle);
-                Log.d("Main: ", myTitle);
+
 
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -215,7 +205,7 @@ public class MainActivity2 extends ActionBarActivity implements AdapterView.OnIt
             Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
         }
         catch(Throwable t) {
-            Toast.makeText(this, "Exception: "+ t.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Unable to add file", Toast.LENGTH_LONG).show();
         }
     }//addFileToData
 

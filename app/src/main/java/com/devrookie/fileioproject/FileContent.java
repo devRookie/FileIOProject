@@ -14,11 +14,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-/**
- * Created by Omie Kue on 1/20/2015.
- */
 public class FileContent extends ActionBarActivity{
-    Button btnSave, btnCancel;
+    Button btnSave;
     TextView tvFileName;
     EditText etDescription;
 
@@ -26,18 +23,13 @@ public class FileContent extends ActionBarActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_note_layout);
-        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
 
         Intent intent = getIntent();
         String fileName = intent.getStringExtra("fileName");
 
         this.btnSave = (Button) findViewById(R.id.btnSave);
-        this.btnCancel = (Button) findViewById(R.id.btnClear);
         this.tvFileName = (TextView) findViewById(R.id.tvFileTitle);
         this.etDescription = (EditText) findViewById(R.id.etDescriptionBox);
-
-        //tvFileName.setText(value);
-        //etFileContent.setText("put content here");
 
         tvFileName.setText(fileName);
         read(fileName); //Read the file name
@@ -52,7 +44,7 @@ public class FileContent extends ActionBarActivity{
             {
                 InputStreamReader tmp = new InputStreamReader(in);
                 BufferedReader reader = new BufferedReader(tmp);
-                String str=null;
+                String str;
                 StringBuilder buf = new StringBuilder();
                 while((str = reader.readLine()) != null) {
                     buf.append(str + "\n");
@@ -66,7 +58,7 @@ public class FileContent extends ActionBarActivity{
 
         }
         catch(Throwable t) {
-            Toast.makeText(this, "Exception: " + t.toString(),Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Unable to read file",Toast.LENGTH_LONG).show();
         }
 
     }
@@ -89,7 +81,7 @@ public class FileContent extends ActionBarActivity{
             Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
         }
         catch(Throwable t) {
-            Toast.makeText(this, "Exception: "+ t.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Unable to save", Toast.LENGTH_LONG).show();
         }
     }
 
